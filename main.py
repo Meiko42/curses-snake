@@ -62,15 +62,25 @@ def play_game(subwin):
 
         if not game_over:
             subwin.clear()
-            subwin.addstr(snake_head[0],snake_head[1], "@")
+            # addstr advances cursor, causes exception when going near bottom right of window
+            # addchstr isn't exposed, so using try/except instead. 
+            try:
+                subwin.addstr(snake_head[0],snake_head[1], "@")
+            except curses.error:
+                pass
             if snake_segments:
                 for snake_body_coordinate in snake_segments:
-                    subwin.addstr(snake_body_coordinate[0],snake_body_coordinate[1], "#")
+                    # addstr advances cursor, causes exception when going near bottom right of window
+                    # addchstr isn't exposed, so using try/except instead. 
+                    try:
+                        subwin.addstr(snake_body_coordinate[0],snake_body_coordinate[1], "#")
+                    except curses.error:
+                        pass
                     if snake_body_coordinate == snake_head:
                         game_over = True
             subwin.addstr(food_coordinates[0],food_coordinates[1], food_symbol)
             subwin.refresh()
-            sleep(.3)
+            sleep(.1)
 
 
 
