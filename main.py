@@ -3,25 +3,11 @@ from time import sleep
 from collections import deque
 import random
 
-def do_it(win):
-    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
-    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    curses.curs_set(0)
-    win.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
+def play_game(subwin):
 
-    height,width = win.getmaxyx()
+    subwin_height, subwin_width = subwin.getmaxyx()
 
-    subwin_height = 20
-    subwin_width = 20
-
-    subwin = curses.newwin(subwin_height, subwin_width, int(height / 2 - 10), int(width / 2 - 10))
-    subwin.bkgd(' ', curses.color_pair(2))
-    subwin.nodelay(1)
-    subwin.addstr(10,10, "@")
-    win.refresh()
-    subwin.refresh()
-
-    snake_head = [10, 10]
+    snake_head = [int(subwin_height / 2), int(subwin_width / 2)]
     snake_direction = 119
 
     food_symbol = "*"
@@ -40,12 +26,16 @@ def do_it(win):
         if new_snake_direction != -1:
             snake_direction = new_snake_direction
 
+        # Up
         if snake_direction == 119:
             snake_head[0] = snake_head[0]-1
+        # Down
         if snake_direction == 115:
             snake_head[0] = snake_head[0]+1
+        # Left
         if snake_direction == 97:
             snake_head[1] = snake_head[1]-1
+        # Right
         if snake_direction == 100:
             snake_head[1] = snake_head[1]+1
 
@@ -67,9 +57,8 @@ def do_it(win):
             food_coordinates = [food_y, food_x]
 
         if game_over:
-            win.addstr(0, int(width / 2 - 5), "GAME OVER")
-            win.refresh()
-            sleep(30)
+            curses.beep()
+            return len(snake_segments)
 
         if not game_over:
             subwin.clear()
@@ -84,18 +73,40 @@ def do_it(win):
             sleep(.3)
 
 
-    
-    # while True:
-    #     # Check if screen was re-sized (True or False)
-    #     resize = True
 
-    #     # Action in loop if resize is True:
-    #     if resize is True:
-    #         y, x = win.getmaxyx()
-    #         win.clear()
-    #         curses.resizeterm(y, x)
-    #         win.refresh()
+def do_it(win):
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
+    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.curs_set(0)
+    win.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
 
+    height,width = win.getmaxyx()
+
+    subwin_height = 20
+    subwin_width = 20
+    subwin_y_begin = int(height / 2 - int(subwin_height / 2))
+    subwin_x_begin = int(width / 2 - int(subwin_width / 2))
+
+    subwin = curses.newwin(subwin_height, subwin_width, subwin_y_begin, subwin_x_begin)
+    subwin.bkgd(' ', curses.color_pair(2))
+    subwin.nodelay(1)
+    subwin.addstr(10,10, "@")
+    win.refresh()
+    subwin.refresh()
+
+    high_score = 0
+
+    while True:
+        win.addstr(subwin_y_begin - 1, subwin_x_begin, f"High Score: {high_score}")
+        win.refresh()
+        last_max_length = play_game(subwin)
+        win.addstr(0, int(width / 2 - 5), f"GAME OVER")
+        if last_max_length > high_score:
+            high_score = last_max_length
+        win.addstr(subwin_y_begin - 1, subwin_x_begin, f"High Score: {high_score}")
+        win.refresh()
+        sleep(10)
+        win.clear()
 
 
 if __name__ == '__main__':
