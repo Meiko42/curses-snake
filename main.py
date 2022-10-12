@@ -2,6 +2,9 @@ import curses
 from time import sleep
 from collections import deque
 import random
+from playsound import playsound
+
+soundOn = True
 
 def play_game(subwin):
 
@@ -40,9 +43,13 @@ def play_game(subwin):
             snake_head[1] = snake_head[1]+1
 
         if 0 > snake_head[0] or snake_head[0] >= subwin_height or 0 > snake_head[1] or snake_head[1] >= subwin_width:
+            if soundOn == True:
+                playsound('wav/splat.wav')
             game_over = True
 
         if snake_head == food_coordinates:
+            if soundOn == True:
+                playsound('wav/nom.wav')
             food_coordinates = []
             snake_length += 1
             snake_segments.append(snake_head_pre_move)
